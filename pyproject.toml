@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "charm-refresh-build-version"
-version = "0.1.0"
+version = "0.0.0"  # Overriden by poetry-dynamic-versioning
 description = "Write `charm_version` in refresh_versions.toml from git tag"
 authors = ["Carl Csaposs <carl.csaposs@canonical.com>"]
 readme = "README.md"
@@ -13,9 +13,15 @@ tomlkit = ">=0.13.2"
 [tool.poetry.scripts]
 write-charm-version = 'charm-refresh-build-version._main:main'
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+dirty = true
+strict = true
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0,<2.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.ruff]
 line-length = 100
