@@ -15,8 +15,7 @@ concurrency:
 jobs:
   release-part1:
     name: Release to PyPI (part 1)
-    # TODO update after https://github.com/canonical/data-platform-workflows/pull/294 merged
-    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part1.yaml@release-python-package
+    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part1.yaml@v31.1.0
     permissions:
       contents: write  # Needed to create git tag
 
@@ -44,8 +43,7 @@ jobs:
     needs:
       - release-part1
       - release-trusted-publishing
-    # TODO update after https://github.com/canonical/data-platform-workflows/pull/294 merged
-    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part2.yaml@release-python-package
+    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part2.yaml@v31.1.0
     with:
       git-tag: ${{ needs.release-part1.outputs.git-tag }}
     permissions:

@@ -13,5 +13,4 @@ on:
 jobs:
   check-pr:
     name: Check pull request
-    # TODO update after https://github.com/canonical/data-platform-workflows/pull/294 merged
-    uses: canonical/data-platform-workflows/.github/workflows/check_python_package_pr.yaml@release-python-package
+    uses: canonical/data-platform-workflows/.github/workflows/check_python_package_pr.yaml@v31.1.0
