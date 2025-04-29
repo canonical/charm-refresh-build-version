@@ -1,10 +1,14 @@
 import pathlib
+import subprocess
 
 import dunamai
 import tomlkit
 
 
 def main():
+    # Workaround for https://github.com/canonical/charmcraft/issues/2273
+    subprocess.run(["git", "restore", "charmcraft.yaml"], check=True)
+
     result = dunamai.Version.from_git(
         strict=True, pattern=dunamai.Pattern.DefaultUnprefixed, pattern_prefix=r"v[^/]+/"
     )
