@@ -1,13 +1,24 @@
 [tool.poetry]
 name = "charm-refresh-build-version"
 version = "0.1.0"
-description = ""
+description = "Write `charm_version` in refresh_versions.toml from git tag"
 authors = ["Carl Csaposs <carl.csaposs@canonical.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
+dunamai = ">=1.23.1"
+tomlkit = ">=0.13.2"
+
+[tool.poetry.scripts]
+write-charm-version = 'charm-refresh-build-version._main:main'
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I", "UP"]
