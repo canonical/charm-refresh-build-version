@@ -9,9 +9,12 @@ def main():
     # Workaround for https://github.com/canonical/charmcraft/issues/2273
     subprocess.run(["git", "restore", "charmcraft.yaml"], check=True)
 
-    result = dunamai.Version.from_git(
-        strict=True, pattern=dunamai.Pattern.DefaultUnprefixed, pattern_prefix=r"v[^/]+/"
-    )
+    try:
+        result = dunamai.Version.from_git(
+            strict=True, pattern=dunamai.Pattern.DefaultUnprefixed, pattern_prefix=r"v[^/]+/"
+        )
+    except Exception:
+        raise Exception("Failed to determine charm refresh compatibility version")
     # Example: "v14/1.12.0"
     tag = result._matched_tag
     track, _ = tag.split("/")
