@@ -1,3 +1,4 @@
+import os
 import pathlib
 import subprocess
 
@@ -14,14 +15,46 @@ def main():
             strict=True, pattern=dunamai.Pattern.DefaultUnprefixed, pattern_prefix=r"v[^/]+/"
         )
     except Exception:
-        raise Exception("Failed to determine charm refresh compatibility version")
-    # Example: "v14/1.12.0"
-    tag = result._matched_tag
-    track, _ = tag.split("/")
-    # Example: "14"
-    track = track[1:]
+        if os.environ.get("CI") == "true":
+            # Use strict mode on CI—if a charm refresh compatibility version tag is not
+            # available, the build should fail
+            raise Exception("Failed to determine charm refresh compatibility version")
+        # In `charmcraft pack` LXC container, CI environment variable is not available
+        elif (
+            os.environ.get("TERM")
+            # Typically, TERM is "xterm-256color" or "screen-256color" on Ubuntu machines
+            in (
+                "unknown",  # GitHub-hosted runner
+                "vt220",  # IS-hosted runner
+            )
+            and os.environ.get("TZ") == "Etc/UTC"
+        ):
+            raise Exception(
+                "Failed to determine charm refresh compatibility version. Heuristically assumed "
+                "that `charmcraft pack` LXC container host is a CI machine"
+            )
+        # If a contributor forks a charm repository with "Copy the `main` branch only" checked,
+        # tags will not be included in their fork. If they then clone their forked repository
+        # and attempt to build the charm locally, the build would otherwise fail.
+        # Disable strict mode so that build succeeds
+        result = dunamai.Version.from_git(
+            strict=False, pattern=dunamai.Pattern.DefaultUnprefixed, pattern_prefix=r"v[^/]+/"
+        )
+        # Mark result as dirty so that this charm build is recognized as unreleased (which will
+        # fail refresh compatibility check)
+        result.dirty = True
+
+        track = "unknown"
+    else:
+        # Example: "v14/1.12.0"
+        tag = result._matched_tag
+        track, _ = tag.split("/")
+        # Example: "14"
+        track = track[1:]
     # Example: "14/1.12.0.post1.dev0+71201f4.dirty"
     charm_version = f"{track}/{result.serialize(dirty=True)}"
+    if track == "unknown":
+        assert ".dirty" in charm_version
 
     path = pathlib.Path("refresh_versions.toml")
     with path.open("r") as file:
