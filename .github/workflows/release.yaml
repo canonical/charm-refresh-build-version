@@ -15,18 +15,19 @@ concurrency:
 jobs:
   ci-tests:
     name: Tests
-    uses: ./.github/workflows/ci.yaml
+    uses: $/.github/workflows/ci.yaml
     permissions:
       contents: read
+    cache-mode: none
 
   release-part1:
     name: Release to PyPI (part 1)
     needs:
       - ci-tests
-    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part1.yaml@v48.0.4
+    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part1.yaml@v53.0.0
     permissions:
-      actions: read  # Needed for GitHub API call to get workflow version
       contents: write  # Needed to create git tag
+    cache-mode: none
 
   # Separate job needed to workaround https://github.com/pypi/warehouse/issues/11096
   release-trusted-publishing:
@@ -40,7 +41,7 @@ jobs:
       deployment: true
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: ${{ needs.release-part1.outputs.artifact-name }}
           path: dist/
@@ -48,14 +49,16 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
     permissions:
       id-token: write  # Needed for PyPI trusted publishing
+    cache-mode: none
 
   release-part2:
     name: Release to PyPI (part 2)
     needs:
       - release-part1
       - release-trusted-publishing
-    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part2.yaml@v48.0.4
+    uses: canonical/data-platform-workflows/.github/workflows/release_python_package_part2.yaml@v53.0.0
     with:
       git-tag: ${{ needs.release-part1.outputs.git-tag }}
     permissions:
       contents: write  # Needed to create GitHub release
+    cache-mode: none
